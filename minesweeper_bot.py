@@ -11,46 +11,49 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 client = discord.Client()
 
 prefix = "+"
-debug= True
+debug = True
 version = "1.1"
 width = 9
 height = 9
 nBombs = 20
-board = [ [0 for i in range(width)] for j in range(height)]
-bombs = [[0,0]] * nBombs
-emojis = [":blue_square:",":one:",":two:",":three:",":four:",":five:",":six:",":seven:",":eight:"]
+board = [[0 for i in range(width)] for j in range(height)]
+bombs = [[0, 0]] * nBombs
+emojis = [":blue_square:", ":one:", ":two:", ":three:", ":four:", ":five:", ":six:", ":seven:", ":eight:"]
 emojiBomb = ":boom:"
+
 
 def genBomb(bombs):
     x = randint(0, width - 1)
     y = randint(0, height - 1)
-    if [x,y] in bombs:
+    if [x, y] in bombs:
         return genBomb(bombs)
-    return [x,y]
+    return [x, y]
+
 
 def genBoard():
-    newBoard = [ [0 for i in range(width)] for j in range(height)]
+    newBoard = [[0 for i in range(width)] for j in range(height)]
     bombs = [[0, 0]] * nBombs
     for i in range(nBombs):
         b = genBomb(bombs)
         bombs[i] = b
         newBoard[b[1]][b[0]] = 10
-        for y in range(-1,2):
-            for x in range(-1,2):
-                yc = b[1]+y
-                xc = b[0]+x
+        for y in range(-1, 2):
+            for x in range(-1, 2):
+                yc = b[1] + y
+                xc = b[0] + x
                 if 0 <= xc < width and 0 <= yc < height:
                     newBoard[yc][xc] += 1
     placeVoid = True
-    i=0
-    while placeVoid and i<200:
+    i = 0
+    while placeVoid and i < 200:
         x = randint(0, width - 1)
         y = randint(0, height - 1)
         if newBoard[y][x] == 0:
             newBoard[y][x] = -10
             placeVoid = False
-        i+=1
-    return (newBoard,bombs)
+        i += 1
+    return (newBoard, bombs)
+
 
 def printBoard(b):
     output = ""
@@ -58,24 +61,26 @@ def printBoard(b):
     output += "##### MINESWEEPER #####\n"
     output += "*v{} by Yolwoocle#6689*\n".format(version)
     output += "```"
-    output += "**Size:** {0}x{1} · ".format(width,height)
-    output += "**Mines:** {0} ({1}%)\n".format(nBombs,floor(nBombs/(height*width)*100))
+    output += "**Size:** {0}x{1} · ".format(width, height)
+    output += "**Mines:** {0} ({1}%)\n".format(nBombs, floor(nBombs / (height * width) * 100))
     output += "`Start from the blue square`\n"
     for i in b:
         for j in i:
-            if j<0:
+            if j < 0:
                 output += emojis[0]
-            elif j<9:
-                output += "{1}{0}{1}".format(emojis[j],"||")
+            elif j < 9:
+                output += "{1}{0}{1}".format(emojis[j], "||")
             else:
-                output += "{1}{0}{1}".format(emojiBomb,"||")
+                output += "{1}{0}{1}".format(emojiBomb, "||")
         output += "\n"
     return output
+
 
 @client.event
 async def on_ready():
     print(f'{client.user.name} has connected to Discord!')
-    await client.change_presence(activity=discord.Streaming(name="@ me for help! :D", url="https://www.twitch.tv/twitchplayspokemon"))
+    await bot.change_presence(activity=discord.Game(name="@ me to play!"))
+
 
 @client.event
 async def on_message(message):
@@ -85,5 +90,6 @@ async def on_message(message):
         board, bombs = genBoard()
         msg = printBoard(board)
         await message.channel.send(msg)
+
 
 client.run(TOKEN)
